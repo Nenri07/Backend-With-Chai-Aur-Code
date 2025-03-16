@@ -6,7 +6,16 @@ dotenv.config({
     path:'./env'
 })
 
-connDb()
+connDb().then(()=>{
+    app.listen(process.env.PORT || 7200 ,()=>{
+        console.log(`port on which server running is ${process.env.PORT?process.env.PORT:7200}`);  
+    }
+    )
+})
+.catch((error)=>{
+    console.log(`server persistr an error ${error}`);
+    
+})
 
 
 

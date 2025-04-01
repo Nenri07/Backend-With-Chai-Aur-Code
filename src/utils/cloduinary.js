@@ -32,4 +32,5 @@ import fs from 'fs'
 
     }
     
+    export {uploadOnCloudinary}
     

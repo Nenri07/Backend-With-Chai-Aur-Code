@@ -19,7 +19,9 @@ import fs from 'fs'
                 resource_type:"auto"
             })
 
-            console.log('file uploaded successfuly', response.url);
+            // console.log('file uploaded successfuly', response.url);
+
+            fs.unlinkSync(localFilePath)
             return response
             
             

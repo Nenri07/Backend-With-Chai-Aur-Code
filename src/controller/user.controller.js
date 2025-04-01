@@ -5,17 +5,17 @@ import { uploadOnCloudinary } from '../utils/cloduinary.js';
 import { apiResponse } from '../utils/apiResponse.js';
 
 const registerUser= asyncHandler(async (req,res) => {
-   const {fullName,Password,email}=req.body;
+   const {fullname,password,email,username}=req.body;
    console.log("email",email);
 
-   if ([fullName,email,Password].some(
+   if ([fullname,email,password].some(
     (fields)=>fields?.trim()===""
    )) {
     throw new apiError(400,'all fields have to be filled bro')
     
    }
- const userCheck=  User.findOne({
-    $or:[{fullName},{email}]
+ const userCheck= await User.findOne({
+    $or:[{fullname},{email}]
    })
    if (userCheck) {
      throw new apiError(409,'User with email or password exits already')
@@ -28,6 +28,7 @@ const registerUser= asyncHandler(async (req,res) => {
    }
 
    const avatar= await uploadOnCloudinary(localPathavatar)
+   
    const coverImage= await uploadOnCloudinary(localPathCoverImage)
 
    if(!avatar || !coverImage){
@@ -36,11 +37,12 @@ const registerUser= asyncHandler(async (req,res) => {
    }
 
  const user= await  User.create({
-    fullName,
-    Password,
+    fullname,
+    password,
+    username,
     email:email.toLowerCase(),
-    avatar,
-    coverImage
+    avatar:avatar.url,
+    coverImage: coverImage.url
    })
 
    const createdUser= await User.findById(user._id).select(

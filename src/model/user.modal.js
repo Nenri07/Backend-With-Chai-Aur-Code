@@ -59,7 +59,7 @@ userSchema.methods.isPasswordcorrect=async function(password){
 }
 
 //access token logiv
-userSchema.methods.AccessToken=function (){
+userSchema.methods.AccessTokengenerate=function (){
     return jwt.sign({
         _id:this._id,
         email: this.email,
@@ -72,7 +72,7 @@ userSchema.methods.AccessToken=function (){
 }
 
 //refresh token logic
-userSchema.methods.RefreshToken=function (){
+userSchema.methods.RefreshTokengenerate=function (){
     return jwt.sign({
         _id:this._id,
         email: this.email,

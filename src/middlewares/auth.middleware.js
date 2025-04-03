@@ -12,7 +12,6 @@ import jwt from "jsonwebtoken"
         }
     
        const verifiedTokken=  jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
-       console.log(verifiedTokken);
        
       const user= await User.findById(verifiedTokken?._id).select(
         "-refreshToken -password"

@@ -3,7 +3,7 @@ import { apiError } from '../utils/apiError.js';
 import { User } from '../model/user.modal.js';
 import { uploadOnCloudinary } from '../utils/cloduinary.js';
 import { apiResponse } from '../utils/apiResponse.js';
-
+import jwt from "jsonwebtoken"
 //method to generate access and refresh token
 // const genrateAccessandRefreshtoken= async(userid)=>{
 //  try {
@@ -203,10 +203,63 @@ const logoutUser= asyncHandler(async(req,res)=>{
  .json(new apiResponse(200, {}, "loggedout successfully"))
 
 })
+
+//refreshing the session for Accesstoken
+
+const refreshAccessToken=asyncHandler(async(req,res)=>{
+  //first we have to get token of the user who is signnedout
+  const incomingToken=req.cookie.refreshToken || req.body.refreshToken
+  if(!incomingToken){
+    throw new apiError(401,"unauthorized access")
+  }
+  //verify the jwt
+ try {
+  const decodedToken=  jwt.verify(
+     incomingToken,
+     process.env.REFRESH_TOKEN_SECRET
+   )
+   //findg user from db
+   const user=await User.findById(decodedToken?._id)
+   if(!user){
+     throw new apiError(401,"unauthorized access not valid user")
+   }
+   if(incomingToken!=user?.refreshToken){
+     throw new apiError(401,"nah sassion is not for this user")
+   }
+   //now refreshing in db new genrated token
+ 
+   const options={
+     httpOnly:true,
+     secure:true
+   }
+ // generating new token
+   const {accessToken,newRefreshToken }=await generateAccessAndRefreshToken(user._id)
+ 
+ 
+   return res
+   .status(200)
+   .cookie("refreshToken", newRefreshToken,options)
+   .cookie("accessToken", accessToken,options)
+   .json(
+     new apiResponse(
+       200,
+       {
+         accessToken,refreshToken:newRefreshToken
+       },
+       "session fresh now "
+     )
+ 
+   )
+ 
+ } catch (error) {
+  throw new apiError(500,"bad request by server")
+  
+ }
+})
 //exporting the functions or methods
 export {
   loginUser,
   registerUser,
-  logoutUser
+  logoutUser,
+  refreshAccessToken
 }
-

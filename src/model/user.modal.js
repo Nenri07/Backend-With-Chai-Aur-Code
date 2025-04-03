@@ -61,14 +61,14 @@ userSchema.methods.isPasswordcorrect=async function(password){
 //access token logiv
 userSchema.methods.AccessTokengenerate=function (){
     return jwt.sign({
-        _id:this._id,
-        email: this.email,
-        password:this.password
-    }
-,process.env.ACESS_TOKEN_SECRET,
-{
-    expiresIn:ACESS_TOKEN_EXPIRY
-})
+            _id:this._id,
+            email: this.email,
+            password:this.password
+                     }
+                     ,process.env.ACCESS_TOKEN_SECRET,
+                    {
+                            expiresIn:process.env.ACCESS_TOKEN_EXPIRY
+                    })
 }
 
 //refresh token logic
@@ -80,7 +80,8 @@ userSchema.methods.RefreshTokengenerate=function (){
     }
 ,process.env.REFRESH_TOKEN_SECRET,
 {
-    expiresIn:REFRESH_TOKEN_EXPIRY
+    expiresIn:process.env.REFRESH_TOKEN_EXPIRY
 })
 }
 export const User = mongoose.model('User', userSchema)
+

@@ -5,20 +5,57 @@ import { uploadOnCloudinary } from '../utils/cloduinary.js';
 import { apiResponse } from '../utils/apiResponse.js';
 
 //method to generate access and refresh token
-const genrateAccessandRefreshtoken= async(userid)=>{
- try {
-  const user= User.findById(userid)
-  const accessToken= user.AccessTokengenerate()
-  const refreshToken=user.RefreshTokengenerate()
+// const genrateAccessandRefreshtoken= async(userid)=>{
+//  try {
 
-  user.refreshToken=refreshToken
- await  user.save({validateBeforeSave:false})
- return{accessToken,refreshToken}
 
- } catch (error) {
-  throw new apiError(500,'oops Server side error sorry')
+//   const user= await User.findById(userid)
+//   // console.log(user);
+//   try {
+    
+//     // const accessTokens= user.AccessTokengenerate()
+//   const refreshTokens=user.RefreshTokengenerate()
+//   console.log(refreshTokens);
   
- }
+//   } catch (error) {
+//     console.log("this is token error trace back",error);
+    
+//   }
+  
+  
+
+//   user.refreshToken=refreshTokens
+  
+//  await  user.save({validateBeforeSave:false})
+//  return{accessTokens,refreshTokens}
+
+//  } catch (error) {
+//   throw new apiError(500,'oops Server side error sorry')
+  
+//  }
+
+// }
+const generateAccessAndRefreshToken = async(userId) => {
+  try {
+      const user = await User.findById(userId)
+      if (!user) {
+          throw new apiError(404, "User not found")
+      }
+
+      // Generate tokens
+      const accessToken = user.AccessTokengenerate()
+      const refreshToken = user.RefreshTokengenerate()
+
+      // Update user's refresh token
+      user.refreshToken = refreshToken
+      await user.save({ validateBeforeSave: false })
+
+      return { accessToken, refreshToken }
+
+  } catch (error) {
+      console.error("Token generation error:", error)
+      throw new apiError(500, "Something went wrong while generating tokens")
+  }
 }
 
 
@@ -42,7 +79,8 @@ const loginUser=asyncHandler(async (req,res)=>{
   
   //generating the tokens for session and cookies through method we created and sending _id
    //which mongoose auto generate in mongo db 
-   const {accessToken,refreshToken} =await genrateAccessandRefreshtoken(user._id)
+
+   const {accessToken,refreshToken} =await generateAccessAndRefreshToken(user._id)
    const loggedinUser= await User.findById(user._id).select(
     "-password -refreshToken"
    )
@@ -171,3 +209,4 @@ export {
   registerUser,
   logoutUser
 }
+

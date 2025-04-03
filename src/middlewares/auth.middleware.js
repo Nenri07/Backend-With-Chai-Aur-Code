@@ -1,17 +1,19 @@
-import { User } from "../model/user.modal";
-import { apiError } from "../utils/apiError";
-import { asyncHandler } from "../utils/asyncHandler";
+import { User } from "../model/user.modal.js";
+import { apiError } from "../utils/apiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken"
 
  export const verifyJWT= asyncHandler(async (req,res,next)=>{
     try {
         const token= req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer","")
-    
+        
         if(!token){
             throw new apiError(401,"unauthorize Request")    
         }
     
-       const verifiedTokken=  jwt.verify(token,process.env.ACESS_TOKEN_SECRET)
+       const verifiedTokken=  jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
+       console.log(verifiedTokken);
+       
       const user= await User.findById(verifiedTokken?._id).select(
         "-refreshToken -password"
        )

@@ -464,6 +464,60 @@ return res
 
 
 })
+
+//watch history and sub pipeline
+
+const getwatchHistory= asyncHandler(async(req,res)=>{
+  const user= await User.aggregate([{
+    $match:{
+      _id:new mongoose.Types.ObjectId(req.user._id)
+    }
+  },
+  {
+    $lookup:{
+      from:"videos",
+      localField:"watchHistory",
+      foreighnField:"_id",
+      as:"watchHistoryDetails",
+      pipeline:[
+        {
+          $lookup:{
+            from:"users",
+            localField:"owner",
+            foreignField:"_id",
+            as:"Owner",
+            pipeline:[
+              {
+                $project:{
+                  fullname:1,
+                  username:1,
+                  avatar:1
+                }
+              }
+            ]
+          }
+        }
+        ,{
+          $addFields:{
+            owner:{
+              $first:"$Owner"
+
+            }
+          }
+        }
+      ]
+    }
+  }
+])
+
+return res
+.status(200),
+json(new apiResponse(
+  200,
+  user[0].watchHistoryDetails,
+  "fetched watch history successfully"
+))
+})
 //exporting the functions or methods
 export {
   loginUser,
@@ -475,5 +529,6 @@ export {
   updateAccountDetails,
   updateavatar,
   updatCoverImage,
-  channelDetails
+  channelDetails,
+  getwatchHistory
 }

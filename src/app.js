@@ -28,9 +28,12 @@ app.use(cookieParser())
 ///routers importing
 
 import  userRoute  from './routes/user.routes.js'
+import videoRoute from './routes/video.routes.js'
 
 //routes
 //its actually here with middleware
 app.use('/api/v1/user',userRoute)
+app.use("/api/v1/videos", videoRoute)
+
 
 export default app

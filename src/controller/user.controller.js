@@ -2,10 +2,10 @@ import {asyncHandler} from '../utils/asyncHandler.js'
 import { apiError } from '../utils/apiError.js';
 import { User } from '../model/user.modal.js';
 import { uploadOnCloudinary } from '../utils/cloduinary.js';
-// import  apiResponse  from '../utils/apiResponse.js';
-import { apiResponse } from '../utils/ApiResponse.js';
+import  {apiResponse}  from '../utils/apiResponse.js';
+// import { apiResponse } from '../utils/ApiResponse.js';
 import jwt from "jsonwebtoken"
-import { apiResponse } from '../utils/ApiResponse.js';
+// import { apiResponse } from '../utils/ApiResponse.js';
 //method to generate access and refresh token
 // const genrateAccessandRefreshtoken= async(userid)=>{
 //  try {

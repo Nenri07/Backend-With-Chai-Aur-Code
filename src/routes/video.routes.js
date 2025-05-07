@@ -6,7 +6,7 @@ import {
     publishAVideo,
     togglePublishStatus,
     updateVideo,
-} from "../controllers/video.controller.js"
+} from "../controller/video.controller.js"
 import {verifyJWT} from "../middlewares/auth.middleware.js"
 import {upload} from "../middlewares/multer.middleware.js"
 
@@ -14,8 +14,7 @@ const router = Router();
 router.use(verifyJWT); // Apply verifyJWT middleware to all routes in this file
 
 router
-    .route("/")
-    .get(getAllVideos)
+    .route("/publish")
     .post(
         upload.fields([
             {
@@ -30,6 +29,15 @@ router
         ]),
         publishAVideo
     );
+
+
+
+//  router.route(
+//     "/publish"
+//  )   
+// .post(publishAVideo)
+
+
 
 router
     .route("/:videoId")

@@ -47,4 +47,8 @@ router
 
 router.route("/toggle/publish/:videoId").patch(togglePublishStatus);
 
+router
+    .route("/")
+    .get(getAllVideos)
+
 export default router

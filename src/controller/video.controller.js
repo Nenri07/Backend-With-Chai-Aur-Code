@@ -6,10 +6,110 @@ import {apiResponse} from "../utils/apiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 import {uploadOnCloudinary} from "../utils/cloduinary.js"
 
-
+//done
 const getAllVideos = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
-    //TODO: get all videos based on query, sort, pagination
+
+
+    //ok so req.query do just get query of url after?
+    //check wheather userId exist or not cause all tother have default values
+    //now from Video document using agregate
+    //match the document (where clause means)
+    //use $or as for any of the condition get correct it will collect the data of documents
+    // use $regex:query ,$options:"i" i means wheather capital or small case it will find all case insentive
+    //now lookup with user document(like join in sql) and name the field
+    //now project the columns(fields) we want using 1
+    //convert to object cause its array using unwind:
+    //sortby using the ascending descending sorttype -1 for deccending and 1 is for accending
+    //now paginnate like if we are on page 2 we will $skip previous results
+    //$limit the page content like 10 rows 
+    //return response
+
+try {
+        const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
+    
+        if(!userId){
+            throw new apiError(
+                400,
+                "not authorized to check videos"
+            )
+        }
+      console.log(req.query);
+      
+        const videos= await Video.aggregate([
+    
+           {
+            $match:{
+                $or:[
+                    {Title:{$regex:query,$options:"i"}},
+                    {Description:{$regex:query,$options:"i"}}
+                ]
+            }
+    
+           }, 
+           {
+            $lookup:{
+                from:'users',
+                localField:'Owner',
+                foreignField:"_id",
+                as:"createdBy"
+            }
+    
+           },
+           {
+            $unwind:"$createdBy"
+           },
+           {
+            $project:{
+                videoFile:1,
+                Title:1,
+                Description:1,
+                thumbnail:1,
+                createdBy:
+                  {
+                    username:1,
+                    fullname:1,
+                    avatar:1
+                  }  
+            }
+    
+           },
+           {
+            $sort:{ 
+            [sortBy]:sortType==='asc' ? 1:-1
+            }
+           },
+           {
+            $skip:(page-1)*limit
+           },
+           {
+            $limit: parseInt(limit)
+           } 
+        ])
+    console.log(videos);
+    
+        if(!videos){
+            throw new apiError(
+                400,
+                "Error while fetching videos from db"
+            )
+    
+        }
+    
+        return res
+        .status(200)
+        .json(
+            new apiResponse(
+                200,
+                {videos},
+                "sucessfully feteched the user videos"
+            )
+        )
+        
+} catch (error) {
+    throw new apiError(
+        error?.message||"Error while fetching from server please try again later"
+    )
+}
     
 })
 //done
@@ -242,14 +342,118 @@ const updateVideo = asyncHandler(async (req, res) => {
 
 
 })
-
+// done but have to do delete from cloudinary
 const deleteVideo = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
     //TODO: delete video
-})
+    //get video by id
+    //video.thumbnail+videFile delete from cloudinary
+    //delete the video from the db using findbyidandDelete using video id
 
+        try {
+            const { videoId } = req.params
+            const loggedinuser=req.user?._id
+            const video= await Video.findById(videoId)
+    
+            if(!videoId){
+                throw new apiError(
+                    400,
+                    "bad request client side error no video found "
+                )
+            }
+
+
+            if(!(video.Owner!==loggedinuser))
+            {
+                throw new apiError(
+                    402,
+                    "you aren ot authorized to delete this video"
+                )
+            }
+
+    
+            const videotoDelete=await Video.findByIdAndDelete(videoId)
+    
+            if(!videotoDelete)
+            {
+                throw new apiError(
+                    400,
+                    "server side error while removing the video"
+                )
+            }
+    
+            return res
+            .status(200)
+            .json(
+                new apiResponse(
+                    500,
+                    {videotoDelete},
+                    "successfully delted the video"
+                )
+            )
+    
+        } catch (error) {
+            throw new apiError(
+                500,
+                error?.message|| "server side error please try again later"
+            )
+        }
+})
+//done
 const togglePublishStatus = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
+    //find video by id and update using model.findbyidandUpdate
+ try {
+       const { videoId } = req.params
+       const user= req.user?._id
+       const {Owner,isPublished}=await Video.findById(videoId)
+   
+   
+       if(!videoId){
+           throw new apiError(
+               403,
+               "client side error while performing  toggling"
+   
+           )
+       }
+   
+       if(Owner.toString()!==user.toString()){
+           throw new apiError(
+               403,
+               "not authorized to do this action"
+           )
+       }
+       const toggledVideo=await Video.findByIdAndUpdate(videoId,{
+           $set:{
+               isPublished:!isPublished
+           }
+   
+       },{
+           new:true
+       })
+   
+       if(!toggledVideo){
+           throw new apiError(
+               403,
+               "video not found"
+           )
+       }
+   
+       return res
+       .status(200)
+       .json(
+           new apiResponse(
+               200,
+               {toggledVideo},
+               "video is published successfully"
+               
+           )
+       )
+ } catch (error) {
+    throw new apiError(
+        502,
+        error?.message||"bad request server side Error try again later"
+    )
+    
+ }
 })
 
 export {

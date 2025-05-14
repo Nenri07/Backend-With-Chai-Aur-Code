@@ -31,6 +31,7 @@ import  userRoute  from './routes/user.routes.js'
 import videoRoute from './routes/video.routes.js'
 import tweetRoute from './routes/tweet.routes.js'
 import subscriptionRoute from './routes/subscription.routes.js' 
+import likeRoute from './routes/like.routes.js'
 
 //routes
 //its actually here with middleware
@@ -38,6 +39,8 @@ app.use('/api/v1/user',userRoute)
 app.use("/api/v1/videos", videoRoute)
 app.use("/api/v1/tweet", tweetRoute)
 app.use("/api/v1/subscription", subscriptionRoute)
+app.use("/api/v1/like", likeRoute)
+
 
 
 

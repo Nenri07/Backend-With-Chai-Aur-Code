@@ -3,15 +3,15 @@ import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2'
 
 const commentSchema= new Schema({
  content:{
-    typeof:
-    String,
-    required:true},
+    type:String,
+    required:true
+},
 owner:{
-    typeof:Schema.Types.ObjectId,
+    type:Schema.Types.ObjectId,
     ref:"User"
 },
 video:{
-    typeof:Schema.Types.ObjectId,
+    type:Schema.Types.ObjectId,
     ref:"Video"
 }
 

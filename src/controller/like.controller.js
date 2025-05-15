@@ -1,5 +1,6 @@
 import mongoose, {isValidObjectId} from "mongoose"
 import {Like} from "../model/like.modal.js"
+import { Comment } from "../model/comment.modal.js"
 import { Tweet } from "../model/tweet.modal.js"
 import {Video} from "../model/video.modal.js"
 import {apiError} from "../utils/apiError.js"
@@ -101,12 +102,84 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
             )
         }
 })
-//Pending due to the controller not written yet
+//Done
 const toggleCommentLike = asyncHandler(async (req, res) => {
-    const {commentId} = req.params
     //TODO: toggle like on comment
     //get comment id
     //logged in user id
+    //we have to check that whether in like there is commet liked by user 
+    // if yes delete that
+    //else create that
+    //return response
+
+      try {
+          const {commentId} = req.params
+          const user= req.user?._id
+  
+          if(!commentId){
+              throw new apiError(
+                  404,
+                  "please enter the comment id to like or dislike "
+              )
+          }
+  
+          const isComment= await Comment.findById(commentId)
+          if(!isComment){
+              throw new apiError(
+                  404,
+                  "comment by this id is not found"
+              )
+          } 
+  
+          const isCommentLiked= await Like.findOne({
+              comment:commentId,
+              likedBy:user
+          })
+  
+          if(!isCommentLiked){
+              const likeComment= await Like.create({
+                  comment:new mongoose.Types.ObjectId(commentId),
+                  likedBy:user
+              })
+              if(!likeComment){
+                  throw new apiError(
+                      400,
+                      "while liking we caught upto something bad so try again later"
+                  )
+              }
+              return res
+              .status(200)
+              .json(
+                  new apiResponse(
+                      200
+                      ,{likeComment},
+                      "comment Liked Successfully"
+                  )
+              )
+  
+          }else{
+              const unlikeComment= await Like.findByIdAndDelete(isCommentLiked?._id)
+              if(!unlikeComment){
+                  throw new apiError(
+                      400,
+                      "we caught upto something bad while unliking comment please try later"
+                  )
+              }
+              return res
+              .status(200)
+              .json(
+                  new apiResponse(200,
+                  {unlikeComment},
+                  "unliked the comment successfully")
+  
+              )
+          }
+      } catch (error) {
+        throw new apiError(
+            500,
+            error?.message||"oops there is an error in server side contact the devs"
+        )
+      }
 
 
 })

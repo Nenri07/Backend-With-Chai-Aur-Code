@@ -221,8 +221,8 @@ const getVideoById = asyncHandler(async (req, res) => {
       const video= await Video.findById(videoId)
       if(!video){
           throw new apiError(
-              402,
-              "error while fetching data from server try again later"
+              404,
+              "video not found"
           )
       }
   
@@ -235,6 +235,7 @@ const getVideoById = asyncHandler(async (req, res) => {
               "video fetched successfully"
           )
       )
+
   
   } catch (error) {
     throw new apiError(

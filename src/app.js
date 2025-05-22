@@ -34,6 +34,7 @@ import subscriptionRoute from './routes/subscription.routes.js'
 import likeRoute from './routes/like.routes.js'
 import commentRoute from './routes/comment.routes.js'
 import dashboardRoute from './routes/dashboard.routes.js'
+import playlistRoute from './routes/playlist.routes.js'
 
 //routes
 //its actually here with middleware
@@ -44,6 +45,7 @@ app.use("/api/v1/subscription", subscriptionRoute)
 app.use("/api/v1/like", likeRoute)
 app.use('/api/v1/comment', commentRoute)
 app.use('/api/v1/dashboard', dashboardRoute)
+app.use('/api/v1/playlist', playlistRoute)
 
 
 

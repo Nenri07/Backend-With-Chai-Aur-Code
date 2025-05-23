@@ -5,6 +5,7 @@ import {apiError} from "../utils/apiError.js"
 import {apiResponse} from "../utils/apiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 import { User } from "../model/user.modal.js"
+import {Video} from "../model/video.modal.js";
 
 //done
 const createPlaylist = asyncHandler(async (req, res) => {
@@ -170,14 +171,122 @@ try {
     )
 }
 })
-
+//done
 const addVideoToPlaylist = asyncHandler(async (req, res) => {
-    const {playlistId, videoId} = req.params
-})
+    //get video id and playlist id
+    //from video check weather that video exists if yes than check ehtaher playlist exists or not 
+    //if both yes in the playlist updateOne match the playlist id
+    //push the video into the videos array
+    //retun res
+try {
+        const { videoId,playlistId} = req.params
+    
+        if(!playlistId|| !videoId){
+            throw new apiError(
+                400,
+                "Please Enter the Video and playlist Ids"
+            )
+        }
+    
+        const [isPlaylist,isVideo]= await Promise.all(
+            [
+             Video.findById(videoId),
+             Playlist.findById(playlistId)   
+            ]
+        )
+        if(!isPlaylist||!isVideo){
+            throw new apiError(
+                404,
+                "playlist or video not found please enter valid id"
+            )
+        }
+        const addedVideo= await Playlist.findByIdAndUpdate(
+            playlistId,
+            {
+                $push:{
+                    videos:new mongoose.Types.ObjectId(videoId)
+            }
+            },
+            {
+                new:true
+            }
+        )
+    return res
+    .status(200)
+    .json(
+        new apiResponse(
+            200,
+            addedVideo,
+            "video added in playlist successfully"
+        )
+    )
+} catch (error) {
+    throw new apiError(
+        500,
+        error?.message||"there is a problem in server please report bug"
+    )
+}
 
+
+})
+//done
 const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
-    const {playlistId, videoId} = req.params
-    // TODO: remove video from playlist
+
+
+    //get the playlist amd the videoId from the user and verify
+    //use same update but now use pull 
+    //return response
+    try {
+        const {playlistId, videoId} = req.params
+    
+        if(!playlistId||!videoId){
+            throw new apiError(
+                400,
+                "Enter the playlist and video id"
+            )
+        }
+    
+        const [isPlaylist,isVideo]= await Promise.all(
+            [
+                Playlist.findById(playlistId),
+                Video.findById(videoId)
+            ]
+        )
+        if(!isPlaylist|| !isVideo){
+            throw new apiError(
+                404,
+                "Enter valid Playlist and video Id"
+            )
+        }
+    
+        const updatedPlaylist= await Playlist.findByIdAndUpdate(playlistId,
+            {
+                $pull:{
+                    videos:new mongoose.Types.ObjectId(videoId)
+                }
+    
+            },
+            {
+                new:true
+            }
+        )
+    
+        
+        return res
+        .status(200)
+        .json(
+            new apiResponse(
+                200,
+                updatedPlaylist,
+                "updated playlist successfully"
+            )
+        )
+    } catch (error) {
+        throw new apiError(
+            500,
+            error?.message||"server side error please repost bug"
+        )
+    }
 
 })
 //done
